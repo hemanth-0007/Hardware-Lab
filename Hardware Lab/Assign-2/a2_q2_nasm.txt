@@ -1,0 +1,108 @@
+section .data
+   s1 : db 'enter the number : ',10
+   l1 : equ $-s1
+   s2 : db 'the square of the given number is: ',10
+   l2 : equ $-s2
+   s3 : db 'entered number has more than 2 digits ',10
+   l3 : equ $-s3
+   l : db 10
+
+section .bss
+num : resw 10
+count : resw 10
+num1 : resb 1
+
+section .text
+global _start:
+_start:
+
+mov eax,4
+mov ebx,1
+mov ecx,s1
+mov edx,l1
+int 80h
+mov word[num],0
+mov word[count],0
+loop1 :
+mov eax,3
+mov ebx,0
+mov ecx,num1
+mov edx,1
+int 80h
+cmp byte[num1],10
+je end_read1
+cmp word[count],2
+je invalid
+inc word[count]
+mov ax,word[num]
+mov bx,10
+mul bx
+mov bl,byte[num1]
+sub bl,30h
+add ax,bx
+mov word[num],ax
+jmp loop1
+
+end_read1:
+mov eax,4
+mov ebx,1
+mov ecx,s2
+mov edx,l2
+int 80h
+mov word[count],0
+mov ax,0
+mov bx,word[num]
+loop2 :
+cmp word[count],bx
+je print
+inc word[count]
+add ax,bx
+jmp loop2
+
+print:
+mov word[num],ax
+mov word[count],0
+pusha
+extract :
+cmp word[num],0
+je print_num
+inc word[count]
+mov dx,0
+mov ax,word[num]
+mov bx,10
+div bx
+push dx
+mov word[num],ax
+jmp extract
+
+print_num :
+cmp word[count],0
+je exit
+dec word[count]
+pop dx
+mov byte[num1],dl
+add byte[num1],30h
+mov eax,4
+mov ebx,1
+mov ecx,num1
+mov edx,1
+int 80h
+jmp print_num
+
+exit :
+mov eax,4
+mov ebx,1
+mov ecx,l
+mov edx,1
+int 80h
+mov eax,1
+mov ebx,0
+int 80h
+
+invalid :
+mov eax,4
+mov ebx,1
+mov ecx,s3
+mov edx,l3
+int 80h
+jmp exit

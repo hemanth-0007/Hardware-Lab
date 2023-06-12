@@ -1,0 +1,770 @@
+; Posimsetti Hemanth Venkata Sai
+; B210500CS
+
+
+1.  
+section .data
+   s1 : db 'enter first number : '
+   l1 : equ $-s1
+   s2 : db 'enter second number : '
+   l2 : equ $-s2
+   s3 : db 'enter third number : '
+   l3 : equ $-s3
+   s4 : db 'the greatest number is : '
+   l4 : equ $-s4
+   s5 : db 'entered number has more than 2 digits '
+   l5 : equ $-s5
+   l : db 10
+
+section .bss
+num : resw 10
+var1 : resw 10
+var2 : resw 10
+var3 : resw 10
+count : resb 10
+num1 : resb 1
+
+
+section .text
+global _start:
+_start:
+
+mov eax,4
+mov ebx,1
+mov ecx,s1
+mov edx,l1
+int 80h
+;pusha
+mov word[num],0
+mov word[var1],0
+mov word[var2],0
+mov word[var3],0
+loop1 :
+mov eax,3
+mov ebx,0
+mov ecx,num1
+mov edx,1
+int 80h
+cmp byte[num1],10
+je end_read1
+cmp word[var3],2
+je invalid
+inc word[var3]
+mov ax,word[num]
+mov bx,10
+mul bx
+mov bl,byte[num1]
+sub bl,30h
+add ax,bx
+mov word[num],ax
+jmp loop1
+
+end_read1:
+;popa
+mov ax,word[num]
+mov word[var2],ax
+mov eax,4
+mov ebx,1
+mov ecx,s2
+mov edx,l2
+int 80h
+;pusha
+mov word[num],0
+mov word[var3],0
+loop2 :
+mov eax,3
+mov ebx,0
+mov ecx,num1
+mov edx,1
+int 80h
+cmp byte[num1],10
+je end_read2
+cmp word[var3],2
+je invalid
+inc word[var3]
+mov ax,word[num]
+mov bx,10
+mul bx
+mov bl,byte[num1]
+sub bl,30h
+add ax,bx
+mov word[num],ax
+jmp loop2
+
+end_read2:
+;popa
+mov ax,word[num]
+cmp word[var2],ax
+jb shift1
+jmp read3
+
+read3 :
+;pusha
+mov word[num],0
+mov word[var3],0
+mov eax,4
+mov ebx,1
+mov ecx,s3
+mov edx,l3
+int 80h
+loop3 :
+mov eax,3
+mov ebx,0
+mov ecx,num1
+mov edx,1
+int 80h
+cmp byte[num1],10
+je end_read3
+cmp word[var3],2
+je invalid
+inc word[var3]
+mov ax,word[num]
+mov bx,10
+mul bx
+mov bl,byte[num1]
+sub bl,30h
+add ax,bx
+mov word[num],ax
+jmp loop3
+
+end_read3:
+;popa
+mov ax,word[num]
+cmp word[var2],ax
+jb shift2
+jmp print
+
+print: 
+mov eax,4
+mov ebx,1
+mov ecx,s4
+mov edx,l4
+int 80h
+mov byte[count],0
+pusha
+extract :
+cmp word[var2],0
+je print_num
+inc byte[count]
+mov dx,0
+mov ax,word[var2]
+mov bx,10
+div bx
+push dx
+mov word[var2],ax
+jmp extract
+
+print_num :
+cmp byte[count],0
+je exit
+dec byte[count]
+pop dx
+mov byte[num1],dl
+add byte[num1],30h
+mov eax,4
+mov ebx,1
+mov ecx,num1
+mov edx,1
+int 80h
+jmp print_num
+
+exit :
+mov eax,4
+mov ebx,1
+mov ecx,l
+mov edx,1
+int 80h
+mov eax,1
+mov ebx,0
+int 80h
+
+invalid :
+mov eax,4
+mov ebx,1
+mov ecx,s5
+mov edx,l5
+int 80h
+jmp exit
+
+shift1 :
+;pusha
+mov ax,word[num]
+mov word[var2],ax
+;popa
+jmp read3
+
+shift2 :
+;pusha
+mov ax,word[num]
+mov word[var2],ax
+;popa
+jmp print
+      
+      
+2. 
+   section .data
+   s1 : db 'enter the number : ',10
+   l1 : equ $-s1
+   s2 : db 'the square of the given number is: ',10
+   l2 : equ $-s2
+   s3 : db 'entered number has more than 2 digits ',10
+   l3 : equ $-s3
+   l : db 10
+
+section .bss
+num : resw 10
+count : resw 10
+num1 : resb 1
+
+section .text
+global _start:
+_start:
+
+mov eax,4
+mov ebx,1
+mov ecx,s1
+mov edx,l1
+int 80h
+mov word[num],0
+mov word[count],0
+loop1 :
+mov eax,3
+mov ebx,0
+mov ecx,num1
+mov edx,1
+int 80h
+cmp byte[num1],10
+je end_read1
+cmp word[count],2
+je invalid
+inc word[count]
+mov ax,word[num]
+mov bx,10
+mul bx
+mov bl,byte[num1]
+sub bl,30h
+add ax,bx
+mov word[num],ax
+jmp loop1
+
+end_read1:
+mov eax,4
+mov ebx,1
+mov ecx,s2
+mov edx,l2
+int 80h
+mov word[count],0
+mov ax,0
+mov bx,word[num]
+loop2 :
+cmp word[count],bx
+je print
+inc word[count]
+add ax,bx
+jmp loop2
+
+print:
+mov word[num],ax
+mov word[count],0
+pusha
+extract :
+cmp word[num],0
+je print_num
+inc word[count]
+mov dx,0
+mov ax,word[num]
+mov bx,10
+div bx
+push dx
+mov word[num],ax
+jmp extract
+
+print_num :
+cmp word[count],0
+je exit
+dec word[count]
+pop dx
+mov byte[num1],dl
+add byte[num1],30h
+mov eax,4
+mov ebx,1
+mov ecx,num1
+mov edx,1
+int 80h
+jmp print_num
+
+exit :
+mov eax,4
+mov ebx,1
+mov ecx,l
+mov edx,1
+int 80h
+mov eax,1
+mov ebx,0
+int 80h
+
+invalid :
+mov eax,4
+mov ebx,1
+mov ecx,s3
+mov edx,l3
+int 80h
+jmp exit
+
+      
+      
+3.
+section .bss
+  num1 : resd 1
+  num2: resd 1
+  temp : resb 1
+  sum: resd 1
+  count: resw 1
+  
+section .data
+  zero: db '0 ',0ah
+  newline : db 10
+  sumis : db 'Sum is ',10
+  l1 : equ $-sumis
+  inp : db 'Input number',0ah
+  l2 : equ $-inp
+  over: db 'Overflow detected',0ah
+  l3: equ $-over
+  
+section .text
+   global _start:
+   _start:
+  	
+  	read_num1:
+	    pusha
+	    mov word[num1],0
+	    
+	 mov eax,4
+	 mov ebx,1
+	 mov ecx,inp
+	 mov edx,l2
+	 int 80h
+            
+	loop_read1:
+	    mov eax, 3
+	    mov ebx, 0
+	    mov ecx, temp
+	    mov edx, 1
+	    int 80h
+	    cmp byte[temp], 10
+	    je end_read1
+	    mov eax, dword[num1]
+	    mov ebx, 10
+	    mul ebx
+	    mov bl, byte[temp]
+	    sub bl,30h
+	    mov bh, 0
+	    add eax, ebx
+	    mov dword[num1], eax
+	    jmp loop_read1
+	    
+	end_read1:
+	    popa
+	
+	read_num2:
+	    pusha
+	    mov dword[num2],0
+	    
+	 mov eax,4
+	 mov ebx,1
+	 mov ecx,inp
+	 mov edx,l2
+	 int 80h
+            
+	loop_read2:
+	    mov eax, 3
+	    mov ebx, 0
+	    mov ecx, temp
+	    mov edx, 1
+	    int 80h
+	    cmp byte[temp], 10
+	    je end_read2
+	    mov eax, dword[num2]
+	    mov ebx, 10
+	    mul ebx
+	    mov bl, byte[temp]
+	    sub bl,30h
+	    mov bh, 0
+	    add ax, bx
+	    mov dword[num2], eax
+	    jmp loop_read2
+	    
+	end_read2:
+	    popa
+	    
+	 mov eax,dword[num1]
+	 add dword[sum],eax
+	 mov eax,0
+	 mov eax,dword[num2]
+	 add dword[sum],eax
+	 jc oflow
+	 jnc print_num
+	 
+	 oflow:
+	 	mov eax,4
+	 	mov ebx,1
+	 	mov ecx,over
+	 	mov edx,l3
+	 	int 80h
+	 	jmp exit
+	 
+	 zeroprint:
+		mov eax,4
+        	mov ebx,1
+        	mov ecx,sumis
+        	mov edx,l1
+        	int 80h
+        		
+		mov eax,4
+		mov ebx,1
+		mov ecx,zero
+		mov edx,1
+		int 80h
+		jmp exit
+		
+	print_num:
+        	cmp dword[sum],0
+        	je zeroprint
+        	
+        	mov eax,4
+        	mov ebx,1
+        	mov ecx,sumis
+        	mov edx,l1
+        	int 80h
+        	
+		mov byte[count],0
+		pusha
+		
+	extract_no:
+		cmp dword[sum], 0
+		je print_no
+		inc byte[count]
+		mov edx, 0
+		mov eax, dword[sum]
+		mov ebx, 10
+		div ebx
+		push edx
+		mov dword[sum], eax
+		jmp extract_no
+		
+	print_no:
+		cmp byte[count], 0
+		je end_print
+		dec byte[count]
+		pop edx
+		mov byte[temp], dl
+		add byte[temp], 30h
+		mov eax, 4
+		mov ebx, 1
+		mov ecx, temp
+		mov edx, 1
+		int 80h
+		jmp print_no
+		
+	end_print:
+		mov eax,4
+		mov ebx,1
+		mov ecx,newline
+		mov edx,1
+		int 80h
+		popa
+		
+        exit:
+        	mov eax,1
+        	mov ebx,0
+        	int 80h
+        	
+        	
+ 
+4.
+
+
+section .data
+  msg1: db "Architechture is Little Endian"
+  size1: equ $-msg1
+  msg2: db "Architechture is Big Endian"
+  size2: equ $-msg2
+
+section .bss
+  temp: resb 1
+
+
+section .text
+  global _start
+
+_start:
+
+  mov eax, 0xffff0000
+  push eax
+  pop ax
+  pop bx
+
+  cmp bx, 0xffff
+  je  LittleEndian
+  
+BigEndian:
+  mov eax, 4
+  mov ebx, 1
+  mov ecx, msg2
+  mov edx, size2
+  int 80h
+  jmp End
+
+
+LittleEndian:
+  mov eax, 4
+  mov ebx, 1
+  mov ecx, msg1
+  mov edx, size1
+  int 80h
+
+
+End:
+  mov eax, 1
+  mov ebx, 0
+  int 80h
+   		
+   		
+5. 
+
+    section .bss
+	array: resd 50
+	n: resd 1
+	temp: resd 1
+	sum: resd 10
+	
+
+	num: resd 1
+	digit: resb 1
+	length: resd 1
+	a: resd 1
+	b: resd 1
+
+section .data
+	msg1: db "Enter the number of elements : "
+	size1: equ $-msg1
+	msg2: db "Enter a number:"
+	size2: equ $-msg2
+	
+	msg3: db "Average: "
+	size3: equ $-msg3
+	msg4: db "Sum: "
+	size4: equ $-msg4
+	
+	newline: db " ",10
+	newline_size: equ $-newline
+	decimal: db "."
+	decimal_size equ $-decimal
+	
+section .text
+	global _start:
+	_start:
+	pusha
+	mov eax, 4
+	mov ebx, 1
+	mov ecx, msg1
+	mov edx, size1
+	int 80h
+	popa
+	
+	call input
+	mov eax,[num]
+	mov [n],eax
+	
+	mov [temp],eax
+	mov ebx,array
+
+	;reading array
+	read:
+	
+		pusha
+		mov eax, 4
+		mov ebx, 1
+		mov ecx, msg2
+		mov edx, size2
+		int 80h
+		popa
+		
+		push ebx
+		call input
+		pop ebx
+		mov eax,[num]
+		mov [ebx],eax
+		add ebx,4
+		dec byte[temp]
+		cmp byte[temp],0
+		ja read
+
+	mov ebx,array
+	mov eax,[n]
+	mov [temp],eax
+	mov dword[sum],0
+
+	add:
+		mov ecx,dword[ebx]
+		add [sum],ecx
+		dec byte[temp]
+		add ebx,4
+		cmp byte[temp],0
+		jnz add
+
+	pusha
+	mov eax,4
+	mov ebx,1
+	mov ecx,msg3
+	mov edx,size3
+	int 80h
+	popa
+	
+	mov eax,[sum]
+	mov ebx,[n]
+	div ebx
+	mov [num],eax
+	call print_number
+	;print decimals
+
+	pusha
+	mov eax,4
+	mov ebx,1
+	mov ecx,decimal
+	mov edx,decimal_size
+	int 80h
+	popa
+
+	mov eax,edx
+	mov ebx,10
+	mul ebx
+	mov ebx,[n]
+	div ebx
+	mov [num],eax
+	call print_number
+
+	mov eax,edx
+	mov ebx,10
+	mul ebx
+	mov ebx, [n]
+	div ebx
+	mov [num],eax
+	call print_number
+	
+	mov eax,edx
+	mov ebx,10
+	mul ebx
+	mov ebx, [n]
+	div ebx
+	mov [num],eax
+	call print_number
+
+	mov eax,4
+	mov ebx,1
+	mov ecx,newline
+	mov edx,newline_size
+	int 80h
+
+	pusha
+	mov eax,4
+	mov ebx,1
+	mov ecx,msg4
+	mov edx,size4
+	int 80h
+	popa
+	
+	mov eax,[sum]
+	mov [num],eax
+	call print_number
+
+	mov eax,4
+	mov ebx,1
+	mov ecx,newline
+	mov edx,newline_size
+	int 80h
+
+	mov eax,1
+	mov ebx,0
+	int 80h
+
+	;funcs
+	input:
+	pusha
+	mov dword[num],0
+
+	digit_loop:
+	mov eax,3
+	mov ebx,0
+	mov ecx,digit
+	mov edx,1
+	int 80h
+
+	cmp byte[digit],10
+	je end_input
+
+	sub byte[digit],30h
+	mov eax,[num]
+	mov ebx,10
+	mul ebx
+	add eax,dword[digit]
+	mov [num],eax
+
+	jmp digit_loop
+	end_input:
+	popa
+	ret
+
+	print_number:
+	pusha
+	mov dword[length],0
+	cmp dword[num],0
+	je printzero
+
+	get_number:
+	mov edx,0
+	mov eax, [num]
+	mov ebx,10
+	div ebx
+	mov [num],eax
+	push edx
+	inc dword[length]
+	cmp dword[num],0
+	ja get_number
+
+	print_digit:
+	pop edx
+	mov [digit],dl
+
+	add byte[digit],30h
+	mov eax,4
+	mov ebx,1
+	mov ecx,digit
+	mov edx,1
+	int 80h
+
+	dec dword[length]
+	cmp dword[length],0
+	ja print_digit
+
+	jmp end_print
+
+	printzero:
+	mov byte[length],1
+	mov edx, [num]
+	push edx
+	jmp print_digit
+	
+		
+	end_print:
+	popa
+	ret
+      
+      
+      
+      
+      ; nasm -f elf filename.asm
+     ; ld -melf_i386 filename.o -o output filename
+     ; ./output filename
+  
+      

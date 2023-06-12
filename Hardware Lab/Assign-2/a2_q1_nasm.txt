@@ -1,0 +1,196 @@
+section .data
+   s1 : db 'enter first number : '
+   l1 : equ $-s1
+   s2 : db 'enter second number : '
+   l2 : equ $-s2
+   s3 : db 'enter third number : '
+   l3 : equ $-s3
+   s4 : db 'the greatest number is : '
+   l4 : equ $-s4
+   s5 : db 'entered number has more than 2 digits '
+   l5 : equ $-s5
+   l : db 10
+
+section .bss
+num : resw 10
+var1 : resw 10
+var2 : resw 10
+var3 : resw 10
+count : resb 10
+num1 : resb 1
+
+
+section .text
+global _start:
+_start:
+
+mov eax,4
+mov ebx,1
+mov ecx,s1
+mov edx,l1
+int 80h
+;pusha
+mov word[num],0
+mov word[var1],0
+mov word[var2],0
+mov word[var3],0
+loop1 :
+mov eax,3
+mov ebx,0
+mov ecx,num1
+mov edx,1
+int 80h
+cmp byte[num1],10
+je end_read1
+cmp word[var3],2
+je invalid
+inc word[var3]
+mov ax,word[num]
+mov bx,10
+mul bx
+mov bl,byte[num1]
+sub bl,30h
+add ax,bx
+mov word[num],ax
+jmp loop1
+
+end_read1:
+;popa
+mov ax,word[num]
+mov word[var2],ax
+mov eax,4
+mov ebx,1
+mov ecx,s2
+mov edx,l2
+int 80h
+;pusha
+mov word[num],0
+mov word[var3],0
+loop2 :
+mov eax,3
+mov ebx,0
+mov ecx,num1
+mov edx,1
+int 80h
+cmp byte[num1],10
+je end_read2
+cmp word[var3],2
+je invalid
+inc word[var3]
+mov ax,word[num]
+mov bx,10
+mul bx
+mov bl,byte[num1]
+sub bl,30h
+add ax,bx
+mov word[num],ax
+jmp loop2
+
+end_read2:
+;popa
+mov ax,word[num]
+cmp word[var2],ax
+jb shift1
+jmp read3
+
+read3 :
+;pusha
+mov word[num],0
+mov word[var3],0
+mov eax,4
+mov ebx,1
+mov ecx,s3
+mov edx,l3
+int 80h
+loop3 :
+mov eax,3
+mov ebx,0
+mov ecx,num1
+mov edx,1
+int 80h
+cmp byte[num1],10
+je end_read3
+cmp word[var3],2
+je invalid
+inc word[var3]
+mov ax,word[num]
+mov bx,10
+mul bx
+mov bl,byte[num1]
+sub bl,30h
+add ax,bx
+mov word[num],ax
+jmp loop3
+
+end_read3:
+;popa
+mov ax,word[num]
+cmp word[var2],ax
+jb shift2
+jmp print
+
+print: 
+mov eax,4
+mov ebx,1
+mov ecx,s4
+mov edx,l4
+int 80h
+mov byte[count],0
+pusha
+extract :
+cmp word[var2],0
+je print_num
+inc byte[count]
+mov dx,0
+mov ax,word[var2]
+mov bx,10
+div bx
+push dx
+mov word[var2],ax
+jmp extract
+
+print_num :
+cmp byte[count],0
+je exit
+dec byte[count]
+pop dx
+mov byte[num1],dl
+add byte[num1],30h
+mov eax,4
+mov ebx,1
+mov ecx,num1
+mov edx,1
+int 80h
+jmp print_num
+
+exit :
+mov eax,4
+mov ebx,1
+mov ecx,l
+mov edx,1
+int 80h
+mov eax,1
+mov ebx,0
+int 80h
+
+invalid :
+mov eax,4
+mov ebx,1
+mov ecx,s5
+mov edx,l5
+int 80h
+jmp exit
+
+shift1 :
+;pusha
+mov ax,word[num]
+mov word[var2],ax
+;popa
+jmp read3
+
+shift2 :
+;pusha
+mov ax,word[num]
+mov word[var2],ax
+;popa
+jmp print

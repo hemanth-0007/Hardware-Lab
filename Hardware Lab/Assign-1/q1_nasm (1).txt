@@ -1,0 +1,62 @@
+; finding whether first num is multiple of other num
+
+section .data
+
+yes : db 'It is a multiple of the given number',0ah
+l1: equ $-yes
+no : db 'It is not a multiple of the given number',0ah
+l2: equ $-no
+
+section .bss
+
+digit1: resb 1
+s1 : resb 1
+digit2: resb 1
+s2 : resb 1
+
+section .text
+
+global _start:
+_start:
+
+mov eax, 3
+mov ebx, 0
+mov ecx, digit1
+mov edx, s1
+int 80h
+sub byte[digit1],30h
+
+mov eax, 3
+mov ebx, 0
+mov ecx, digit2
+mov edx, s2
+int 80h
+sub byte[digit2],30h
+
+mov al, 0
+mov al, byte[digit2]
+mov bl, byte[digit1]
+div bl
+  
+
+cmp ah, 0
+je if
+else:
+mov eax, 4
+mov ebx, 1
+mov ecx, no
+mov edx, l2
+int 80h
+jmp L2
+if:
+mov eax, 4
+mov ebx, 1
+mov ecx, yes
+mov edx, l1
+int 80h
+L2:
+
+
+mov eax, 1
+mov ebx, 0
+int 80h

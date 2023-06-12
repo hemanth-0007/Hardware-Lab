@@ -1,0 +1,129 @@
+section .data
+    msg1 : db 'enter the number :',10
+    len1 : equ $-msg1
+    msg2 : db 'sum is:',10
+    len2 : equ $-msg2
+    newline : db 10
+    
+section .bss
+    count : resb 10
+    counter : resb 10
+    temp : resb 10
+    num : resw 10
+    num1 : resw 10
+    sum : resw 10
+    
+section .text
+global _start:
+_start:
+    
+    mov word[sum],0
+    mov eax,4
+    mov ebx,1
+    mov ecx,msg1
+    mov edx,len1
+    int 80h
+    
+    call read_num
+    
+    mov ax,word[num]
+    mov word[num1],ax
+ 
+    mov byte[counter],0
+    iteration:
+        mov ax,word[num1]
+        movzx cx,byte[counter]
+        cmp cx,ax
+        ja stop
+        call summation
+        add byte[counter],2
+        jmp iteration
+        
+        
+    stop:
+        mov ax,word[sum]
+        mov word[num],ax
+        
+        mov eax,4
+        mov ebx,1
+        mov ecx,msg2
+        mov edx,len2
+        int 80h
+        
+        call print_num
+        jmp exit
+        
+    summation:
+        movzx ax,byte[counter]
+        mov bx,word[sum]
+        add bx,ax
+        mov word[sum],bx
+        ret
+        
+exit:
+    mov eax,1
+    mov ebx,0
+    int 80h
+
+
+read_num :
+    pusha
+    mov word[num],0
+loop_read :
+    mov eax, 3
+    mov ebx ,0
+    mov ecx, temp
+    mov edx, 1
+    int 80h
+    cmp byte[temp],10
+    je end_read
+    mov ax, word[num]
+    mov bx, 10
+    mul bx
+    mov bl, byte[temp]
+    sub bl, 30h
+    mov bh, 0
+    add ax, bx
+    mov word[num],ax
+    jmp loop_read
+end_read :
+    popa
+    ret
+
+print_num :
+   mov byte[count],0
+   pusha
+
+extract_no :
+   cmp word[num],0
+   je print_no
+   inc byte[count]
+   mov dx,0
+   mov ax,word[num]
+   mov bx,10
+   div bx
+   push dx
+   mov word[num],ax
+   jmp extract_no
+   
+print_no :
+    cmp byte[count],0
+    je end_print
+    dec byte[count]
+    pop dx
+    mov byte[temp],dl
+    add byte[temp],30h
+    mov eax,4
+    mov ebx,1
+    mov ecx,temp
+    mov edx,1
+    int 80h
+    jmp print_no
+end_print :
+    mov eax,4
+    mov ebx,1
+    mov ecx,newline
+    mov edx,1
+    int 80h
+    popa
+    ret

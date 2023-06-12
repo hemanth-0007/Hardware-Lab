@@ -1,0 +1,621 @@
+4)section .data
+	newl : db 10
+
+	msg1: db 'enter array elements',10
+	siz1 : equ $-msg1
+
+	msgn : db 'enter array size',10
+	sizn :  equ $-msgn
+
+	msg2 : db 'enter element to findout',10
+	siz2 : equ $-msg2
+	
+	msg3:db 'found',10
+	siz3:equ $-msg3
+	
+	msg4:db 'Not found',10
+	siz4:equ $-msg4
+
+section .bss
+
+	num : resw 1
+	temp : resw 1
+	count : resw 1
+	array : resw  100
+	n : resw 1
+	i : resw 1
+	j : resw 1
+	x : resw 1
+ 	f : resb 1
+ 	nf : resb 1
+
+section .text
+	global _start:
+_start:
+	mov byte[f],1
+	mov byte[nf],0
+	mov eax,4
+	mov ebx,1
+	mov ecx,msgn 
+	mov edx,sizn
+	int 80h
+
+	call read_num
+	mov ax ,word[num]
+	mov word[n],ax
+
+	mov eax,4
+	mov ebx,1
+	mov ecx,msg1 
+	mov edx,siz1
+	int 80h
+
+	mov eax,0
+	mov ebx,array
+
+	call read_array
+	mov eax,4
+	mov ebx,1
+	mov ecx,msg2 
+	mov edx,siz2
+	int 80h
+
+	call read_num
+	mov ax,word[num]
+	mov word[x],ax
+
+	mov eax,0
+	mov ebx,array
+liner_search:
+	mov word[i],0
+	loop:
+		mov ax,word[i]
+		cmp word[n],ax
+		je not_found
+		mov eax,dword[i]
+		mov cx,word[ebx+2*eax]
+		cmp word[x],cx
+		je found
+		inc word[i]
+		jmp loop
+
+
+found:
+	mov eax,4
+	mov ebx,1
+	mov ecx,msg3 
+	mov edx,siz3
+	int 80h
+	
+	mov eax,1
+	mov ebx,0
+	int 80h
+
+not_found:
+	mov eax,4
+	mov ebx,1
+	mov ecx,msg4
+	mov edx,siz4
+	int 80h
+	
+	mov eax,1
+	mov ebx,0
+	int 80h
+
+read_num:
+	pusha
+	mov word[num],0
+
+	read:
+
+		mov eax,3
+		mov ebx,0
+		mov ecx,temp
+		mov edx,1
+		int 80h
+
+		cmp byte[temp],10
+		je end_read
+
+	mov ax,word[num]
+	mov bx,10
+	mul bx
+	mov bl,byte[temp]
+	sub bl,30h
+	mov bh,0	
+	add ax,bx
+	mov word[num],ax
+	jmp read
+end_read:
+	 popa
+	 ret
+
+print_num:
+	pusha
+
+	mov byte[count],0
+
+	ext:
+
+		cmp word[num],0
+		je print
+		inc byte[count]
+		mov dx,0
+		mov ax,word[num]
+		mov bx,10
+		div bx
+		push dx
+		mov word[num],ax
+		jmp ext
+
+	print:
+		cmp byte[count],0
+		je end_print
+		dec byte[count]
+		pop dx
+		mov byte[temp], dl
+		add byte[temp],30h
+		mov eax,4
+		mov ebx,1
+		mov ecx,temp
+		mov edx,1
+		int 80h
+		jmp print
+
+
+end_print:
+	mov eax,4
+	mov ebx,1
+	mov ecx,newl
+	mov edx,1
+	int 80h
+	popa
+	ret
+
+read_array:
+	pusha
+
+	read_loop:
+		cmp eax,dword[n]
+		je end_read_loop
+		call read_num
+		mov cx,word[num]
+		mov word[ebx+2*eax],cx
+		inc eax
+		jmp  read_loop
+	end_read_loop:
+		popa
+		ret	
+
+end:
+	mov eax,1
+	mov  ebx,0
+	int 80h
+
+
+
+6)
+    section .data
+tab: db 9
+newline: db 10
+msg1: db 'Matrix1:',10
+l1: equ $-msg1
+msg2: db 'Matrix2:',10
+l2: equ $-msg2
+row: db 'Enter # of ROWS:',10
+r: equ $-row
+col: db 'Enter # of COLUMNS:',10
+c: equ $-col
+summatrix: db 'Sum of Two Matrices:',10
+sm: equ $-summatrix
+
+
+section .bss
+just_read: resd 1
+just_print: resd 1
+temp: resd 1
+counter: resd 1
+zero: resd 1
+m: resd 1
+n: resd 1
+arr1: resd 50
+arr2: resd 50
+i: resd 1
+j: resd 1
+var: resd 1
+
+
+section .text
+global _start:
+_start:
+
+mov eax,4
+mov ebx,1
+mov ecx,row
+mov edx,r
+int 80h
+call read_num
+mov eax,dword[just_read]
+mov dword[m],eax
+
+
+mov eax,4
+mov ebx,1
+mov ecx,col
+mov edx,c
+int 80h
+call read_num
+mov eax,dword[just_read]
+mov dword[n],eax
+
+mov eax,4
+mov ebx,1
+mov ecx,msg1
+mov edx,l1
+int 80h
+mov ebx,arr1
+mov eax,0
+mov dword[i],0
+call read_2Darray
+
+
+mov eax,4
+mov ebx,1
+mov ecx,msg2
+mov edx,l2
+int 80h
+mov ebx,arr2
+mov eax,0
+mov dword[i],0
+call read_2Darray
+
+mov eax,4
+mov ebx,1
+mov ecx,summatrix
+mov edx,sm
+int 80h
+sum_matrix:
+
+mov eax,0
+mov dword[var],eax
+mov dword[i],0
+i_loop:
+mov dword[j],0
+j_loop:
+mov eax,dword[var]
+mov ebx,arr1
+mov ecx,arr2
+mov edx,dword[ebx+(4*eax)]
+add edx,dword[ecx+(4*eax)]
+mov dword[just_print],edx
+call print_num
+inc dword[var]
+inc dword[j]
+mov edx,dword[j]
+cmp edx,dword[n]
+jb j_loop
+inc dword[i]
+mov eax,4
+mov ebx,1
+mov ecx,newline
+mov edx,1
+int 80h
+mov edx,dword[i]
+cmp edx,dword[m]
+jb i_loop
+
+end:
+mov eax,1
+mov ebx,0
+int 80h
+
+read_2Darray:
+
+pusha
+
+row_loop1:
+mov dword[j],0
+
+col_loop1:
+call read_num
+mov ecx,dword[just_read]
+mov dword[ebx+(4*eax)],ecx
+inc eax
+inc dword[j]
+mov ecx,dword[j]
+cmp ecx,dword[n]
+jb col_loop1
+inc dword[i]
+mov ecx,dword[i]
+cmp ecx,dword[m]
+jb row_loop1
+
+end_read_2Darray:
+
+popa
+ret
+
+print_2Darray:
+
+pusha
+mov dword[i],0
+
+row_loop2:
+mov dword[j],0
+
+col_loop2:
+mov ecx,dword[ebx+(4*eax)]
+mov dword[just_print],ecx
+call print_num
+
+pusha
+mov eax,4
+mov ebx,1
+mov ecx,tab
+mov edx,1
+int 80h
+popa
+
+inc eax
+inc dword[j]
+mov ecx,dword[j]
+cmp ecx,dword[n]
+jb col_loop2
+
+pusha 
+mov eax,4
+mov ebx,1
+mov ecx,newline
+mov edx,1
+int 80h
+popa
+
+inc dword[i]
+mov ecx,dword[i]
+cmp ecx,dword[m]
+jb row_loop2
+
+end_print_2Darray:
+
+popa
+ret
+
+read_num:
+
+pusha
+mov dword[just_read],0
+reading:
+mov eax,3
+mov ebx,0
+mov ecx,temp
+mov edx,1
+int 80h
+
+cmp dword[temp],10
+je end_read
+sub dword[temp],30h
+mov eax,dword[just_read]
+mov edx,0
+mov ebx,10
+mul ebx
+add eax,dword[temp]
+mov dword[just_read],eax
+jmp reading
+
+end_read:
+
+popa
+ret
+
+print_num:
+
+pusha
+mov dword[counter],0
+cmp dword[just_print],0
+jne extracting
+mov dword[zero],30h
+mov eax,4
+mov ebx,1
+mov ecx,zero
+mov edx,1
+int 80h
+jmp end_print
+
+extracting:
+
+cmp dword[just_print],0
+je printing
+mov eax,dword[just_print]
+mov edx,0
+mov ebx,10
+div ebx
+push edx
+mov dword[just_print],eax
+inc dword[counter]
+jmp extracting
+
+printing:
+
+cmp dword[counter],0
+je end_print
+pop edx
+add edx,30h
+mov dword[temp],edx
+mov eax,4
+mov ebx,1
+mov ecx,temp
+mov edx,1
+int 80h
+dec dword[counter]
+jmp printing
+
+end_print:
+mov eax,4
+mov ebx,1
+mov ecx,tab
+mov edx,1
+int 80h
+
+popa
+ret
+
+7)  section .data
+newline : db 0Ah
+zero : db '0'
+space : db ' '
+m1: db "Enter String: ",0Ah
+s1:equ $-m1
+m2: db "Not Palindrome",0Ah
+s2: equ $-m2
+m3: db "Palindrome",0Ah
+s3: equ $-m3 
+
+section .bss
+str : resb 500
+n : resw 1
+i : resw 1
+j : resw 1
+tmp : resb 1
+char: resb 1
+
+num : resw 1
+count : resw 1
+dig : resb 1
+
+section .text
+global _start
+
+_start :
+	mov eax, 4
+	mov ebx, 1
+	mov ecx, m1
+	mov edx, s1
+	int 80h
+
+	call read
+	call check_Palindrome
+
+
+exit :
+	mov eax, 1
+	mov ebx, 0
+	int 80h
+
+
+check_Palindrome:
+	pusha
+	mov word[i],0
+	mov cx, word[n]
+	dec cx
+	mov word[j],cx
+
+cP_loop:
+	mov cx,word[i]
+	cmp cx, word[j]
+	jnb end_cP_loop
+	
+	mov ebx, str
+	movzx eax, word[i]
+	
+	mov cl,byte[ebx+eax]
+	mov byte[char],cl
+
+;;
+;;	mov byte[tmp],cl
+;;	call printchar
+;;
+
+	movzx eax, word[j]
+	mov cl, byte[ebx+eax]
+;;
+;;	mov byte[tmp],cl
+;;	call printchar
+;;
+
+
+	cmp cl, byte[char]
+	je Continue1
+
+	mov eax, 4
+	mov ebx, 1
+	mov ecx, m2
+	mov edx, s2
+	int 80h
+	popa 
+	ret
+		
+Continue1:
+	inc word[i]
+	dec word[j]
+	jmp cP_loop		
+		
+end_cP_loop:
+
+	mov eax, 4
+	mov ebx, 1
+	mov ecx, m3
+	mov edx, s3
+	int 80h
+		
+	popa
+	ret
+
+
+read :
+	pusha
+	mov word[n], 0
+read_loop :
+	mov eax, 3
+	mov ebx, 0
+	mov ecx, tmp
+	mov edx, 1
+	int 80h
+
+	cmp byte[tmp], 10
+	je end_read
+
+	mov ebx, str
+        movzx eax, word[n]
+	mov cl, byte[tmp]
+        mov byte[ebx+eax], cl
+
+	inc word[n]
+	jmp read_loop
+
+end_read :
+	mov ebx, str
+	movzx eax, word[n]
+	mov byte[ebx+eax], 0
+	popa
+	ret
+
+
+printnewline :
+	pusha
+	mov eax, 4
+	mov ebx, 1
+	mov ecx, newline
+	mov edx, 1
+	int 80h
+	popa 
+	ret
+
+printchar:
+	pusha
+	mov eax, 4
+	mov ebx, 1
+	mov ecx, tmp
+	mov edx, 1
+	int 80h
+	call printnewline
+	popa
+	ret	
+
+
+
+
+
+
+
+
+
